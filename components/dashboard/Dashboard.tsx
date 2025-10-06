@@ -6,9 +6,34 @@ import { Input } from "@/components/ui/input";
 import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex-helpers/react/cache/hooks";
 import { Search } from "lucide-react";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, Component, ReactNode, useState } from "react";
 
-export default function Dashboard() {
+class ErrorBoundary extends Component<
+  { children: ReactNode },
+  { error: Error | null }
+> {
+  state: { error: Error | null } = { error: null };
+
+  static getDerivedStateFromError(error: any): { error: Error } {
+    if (error instanceof Error) {
+      return { error };
+    }
+    return { error: new Error(String(error)) };
+  }
+
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="flex h-full w-full items-center justify-center p-4 text-red-500">
+          Error loading plans: {this.state.error.message}
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+function DashboardInner() {
   const [searchPlanText, setSearchPlanText] = useState("");
   const plans = useQuery(api.plan.getAllPlansForAUser, {});
 
@@ -81,5 +106,13 @@ export default function Dashboard() {
         </div>
       </div>
     </section>
+  );
+}
+
+export default function Dashboard() {
+  return (
+    <ErrorBoundary>
+      <DashboardInner />
+    </ErrorBoundary>
   );
 }

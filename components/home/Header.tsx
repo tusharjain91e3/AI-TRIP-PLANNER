@@ -34,9 +34,9 @@ const Header = () => {
             <MobileMenu />
           </div>
           <div className="flex gap-4 justify-end items-center flex-1">
-            <Link href="https://rutugo.com" className="hidden md:block">
+            <Link href="https://www.roammyway.in/" className="hidden md:block">
               <InteractiveHoverButton className="border-2 border-gray-200">
-                Rutugo
+                Roammyway
               </InteractiveHoverButton>
             </Link>
 

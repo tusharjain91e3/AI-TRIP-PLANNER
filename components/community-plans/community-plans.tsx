@@ -13,8 +13,38 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { LoadingPlans } from "@/components/LoadingPlans";
+import { Component, ReactNode, Suspense, useState } from "react";
 
-export default function CommunityPlans({
+function isDefined<T>(value: T | null | undefined): value is T {
+  return value !== null && value !== undefined;
+}
+
+class ErrorBoundary extends Component<
+  { children: ReactNode },
+  { error: Error | null }
+> {
+  state: { error: Error | null } = { error: null };
+
+  static getDerivedStateFromError(error: any): { error: Error } {
+    if (error instanceof Error) {
+      return { error };
+    }
+    return { error: new Error(String(error)) };
+  }
+
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="flex h-full w-full items-center justify-center p-4 text-red-500">
+          Error loading community plans: {this.state.error.message}. Please try again later.
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
+function CommunityPlansInner({
   companionId,
 }: {
   companionId?: string;
@@ -52,13 +82,14 @@ export default function CommunityPlans({
                       2xl:grid-cols-4 4xl:grid-cols-6
                       gap-5 px-10 py-2 justify-center"
             >
-              {results?.map((plan) => (
+              {results?.filter(isDefined).map((plan) => (
                 <PlanCard key={plan._id} plan={plan} isPublic />
               ))}
             </div>
           ) : null}
           {noPlansToShow && <NoPlansFound />}
           {status === "LoadingFirstPage" && <LoadingPlans />}
+          {status === "LoadingMore" && <LoadingPlans />}
           {status === "CanLoadMore" && (
             <Button
               className="w-fit rounded-full mx-auto bg-blue-500 text-white 
@@ -71,6 +102,20 @@ export default function CommunityPlans({
         </div>
       </SidebarInset>
     </SidebarProvider>
+  );
+}
+
+export default function CommunityPlans({
+  companionId,
+}: {
+  companionId?: string;
+}) {
+  return (
+    <ErrorBoundary>
+      <Suspense fallback={<LoadingPlans />}>
+        <CommunityPlansInner companionId={companionId} />
+      </Suspense>
+    </ErrorBoundary>
   );
 }
 

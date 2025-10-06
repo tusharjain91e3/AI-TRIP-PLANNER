@@ -8,7 +8,7 @@ import { useQuery } from "convex-helpers/react/cache/hooks";
 import { ConvexError } from "convex/values";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, type FC } from "react";
 import joinNow from "@/public/join-now.svg";
 
 const Join = () => {

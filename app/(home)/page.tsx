@@ -112,7 +112,7 @@ export default function Home() {
           />
           {/* New Logo (right) - fade in after plane animation */}
           <motion.image
-            href="/rutugo-logo.png"
+            href="https://roammyway.blr1.cdn.digitaloceanspaces.com/RoamMyWay%20Logo.png"
             x="775"
             y="350"
             width="200"
@@ -156,9 +156,9 @@ export default function Home() {
           animate={{ opacity: step >= 3 ? 1 : 0, y: step >= 3 ? 0 : 30 }}
           transition={{ duration: 0.7 }}
         >
-          <Link href="https://rutugo.com">
+          <Link href="https://www.roammyway.in/">
             <InteractiveHoverButton className="border-2 border-blue-500 shadow-xl">
-              Plan Smarter on Rutugo
+              Plan Smarter on Roammyway
             </InteractiveHoverButton>
           </Link>
         </motion.div>
@@ -170,9 +170,9 @@ export default function Home() {
           animate={{ opacity: step >= 3 ? 1 : 0, y: step >= 3 ? 0 : 30 }}
           transition={{ duration: 0.7 }}
         >
-          <Link href="https://rutugo.com">
+          <Link href="https://www.roammyway.in/">
             <InteractiveHoverButton className="border-2 border-blue-500 shadow-xl">
-              Plan Smarter on Rutugo
+              Plan Smarter on Roammyway
             </InteractiveHoverButton>
           </Link>
         </motion.div>
@@ -187,7 +187,7 @@ export default function Home() {
             transition={{ duration: 0.7 }}
             className="flex justify-center items-center md:w-[25vw] w-full h-full flex-col"
           >
-            <h2 className="text-2xl font-bold">What's new in Rutugo?</h2>
+            <h2 className="text-2xl font-bold">What's new in Roammyway?</h2>
             <AnimatedListDemo />
           </motion.article>
         )}

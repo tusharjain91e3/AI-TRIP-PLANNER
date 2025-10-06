@@ -119,7 +119,7 @@ export const getAllPlansForAUser = query({
           .withIndex("by_planId_userId", (q) =>
             q.eq("planId", plan._id).eq("userId", plan.userId)
           )
-          .unique();
+          .first();
 
         return {
           ...plan,

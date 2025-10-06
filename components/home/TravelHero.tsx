@@ -391,7 +391,7 @@ const TravelHero = () => {
                   second: "#ffffff",
                 }}
               >
-                Rutugo
+                Roammyway
               </SparklesText>
             </h1>
           </div>
