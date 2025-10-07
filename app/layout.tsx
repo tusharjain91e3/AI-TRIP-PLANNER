@@ -1,15 +1,22 @@
-import type { Metadata } from "next";
+// app/layout.tsx
+import type { Metadata, Viewport } from "next";
 import { Montserrat_Alternates } from "next/font/google";
 import { Analytics } from "@vercel/analytics/react";
-import ConvexClientProvider from "@/app/ConvexClientProvider";
+import ConvexClientProvider from "@/app/ConvexClientProvider"; // Adjust path if necessary
 import { ThemeProvider } from "@/contexts/ThemeProvider";
+import { ErrorBoundary } from "@/components/ErrorBoundary"; // Ensure this file exists at components/ErrorBoundary.tsx with proper exports/types
 
 import Progress from "@/components/Progress";
 import { Toaster } from "@/components/ui/toaster";
 
 import "./globals.css";
 
-const inter = Montserrat_Alternates({ weight: "500", subsets: ["cyrillic"] });
+const inter = Montserrat_Alternates({ 
+  weight: "500", 
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-inter"
+});
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.travelplannerai.site"),
@@ -39,6 +46,15 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  themeColor: "#ffffff",
+  colorScheme: "light",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 export default function RootLayout({
   children,
 }: {
@@ -46,17 +62,25 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={inter.className}>
+      <head>
+        <meta
+          httpEquiv="Content-Security-Policy"
+          content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.convex.cloud https://openweathermap.org; font-src 'self'; connect-src 'self' https://*.convex.cloud; frame-ancestors 'self'; form-action 'self'; base-uri 'self';"
+        />
+      </head>
+      <body className={`${inter.className} ${inter.variable}`}>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
           enableSystem
           disableTransitionOnChange
         >
-          <ConvexClientProvider>{children}</ConvexClientProvider>
-          <Progress />
-          <Analytics />
-          <Toaster />
+          <ErrorBoundary>
+            <ConvexClientProvider>{children}</ConvexClientProvider>
+            <Progress />
+            <Analytics />
+            <Toaster />
+          </ErrorBoundary>
         </ThemeProvider>
       </body>
     </html>

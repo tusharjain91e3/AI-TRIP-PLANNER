@@ -3,7 +3,6 @@
 import { AuthLoading, Authenticated, Unauthenticated } from "convex/react";
 import { SignInButton, UserButton } from "@clerk/nextjs";
 
-import { Loading } from "@/components/shared/Loading";
 import { cn } from "@/lib/utils";
 import { ThemeDropdown } from "@/components/ThemeDropdown";
 import FeedbackSheet from "@/components/common/FeedbackSheet";

@@ -16,9 +16,8 @@ export default function Home() {
   const [showSecond, setShowSecond] = useState(false);
   const isMobile = useMediaQuery('(max-width: 768px)');
 
-
-  const arcCenterX = 490;
-  const arcCenterY = 390;
+  const arcCenterX = 500;
+  const arcCenterY = 400;
   const arcRadius = 380;
 
   const cx = useTransform(progress, t => arcCenterX + arcRadius * Math.cos(Math.PI * (1 - t)));
@@ -75,9 +74,6 @@ export default function Home() {
           'md:w-[100vw]': !showSecond,
           'md:w-[75vw]': showSecond,
         })}
-        // {`relative flex flex-col items-center justify-center bg-gradient-to-br
-        //  dark:from-[#181A20] dark:via-[#101114] dark:to-[#181A20] overflow-hidden
-        //  ${showSecond ? 'w-[75vw]' : 'w-[100vw]'}`}
         style={{
           transition: "width 0.7s cubic-bezier(0.4,0,0.2,1)",
         }}
@@ -102,8 +98,8 @@ export default function Home() {
           {/* Old Logo (left) - fade in */}
           <motion.image
             href="/logo.png"
-            x="45"
-            y="350"
+            x="20"
+            y="300"
             width="200"
             height="200"
             initial={{ opacity: 0, scale: 0.8 }}
@@ -113,8 +109,8 @@ export default function Home() {
           {/* New Logo (right) - fade in after plane animation */}
           <motion.image
             href="https://roammyway.blr1.cdn.digitaloceanspaces.com/RoamMyWay%20Logo.png"
-            x="775"
-            y="350"
+            x="780"
+            y="300"
             width="200"
             height="200"
             initial={{ opacity: 0, scale: 0.8 }}
@@ -151,14 +147,14 @@ export default function Home() {
           </div>
         </motion.div>
         <motion.div
-          className="hidden md:flex absolute bottom-0 z-10 w-full h-full px-6 py-16 flex-col items-center justify-end -mt-10 p-5"
+          className="hidden md:flex absolute bottom-0 z-10 w-full h-auto px-6 py-8 flex-col items-center justify-end p-5"
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: step >= 3 ? 1 : 0, y: step >= 3 ? 0 : 30 }}
           transition={{ duration: 0.7 }}
         >
-          <Link href="https://www.roammyway.in/">
+          <Link href="https://www.roammyway.in">
             <InteractiveHoverButton className="border-2 border-blue-500 shadow-xl">
-              Plan Smarter on Roammyway
+              Plan Smarter on RoamMyWay
             </InteractiveHoverButton>
           </Link>
         </motion.div>
@@ -170,9 +166,9 @@ export default function Home() {
           animate={{ opacity: step >= 3 ? 1 : 0, y: step >= 3 ? 0 : 30 }}
           transition={{ duration: 0.7 }}
         >
-          <Link href="https://www.roammyway.in/">
+          <Link href="https://www.roammyway.in">
             <InteractiveHoverButton className="border-2 border-blue-500 shadow-xl">
-              Plan Smarter on Roammyway
+
             </InteractiveHoverButton>
           </Link>
         </motion.div>
@@ -187,7 +183,7 @@ export default function Home() {
             transition={{ duration: 0.7 }}
             className="flex justify-center items-center md:w-[25vw] w-full h-full flex-col"
           >
-            <h2 className="text-2xl font-bold">What's new in Roammyway?</h2>
+            <h2 className="text-2xl font-bold">What's new in RoamMyWay?</h2>
             <AnimatedListDemo />
           </motion.article>
         )}

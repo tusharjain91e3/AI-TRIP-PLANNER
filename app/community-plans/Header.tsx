@@ -43,7 +43,13 @@ const Header = () => {
             </AuthLoading>
             <Unauthenticated>
               <ThemeDropdown />
-              <SignInButton mode="modal" afterSignInUrl="/dashboard" />
+              <SignInButton 
+                mode="modal" 
+                forceRedirectUrl="/dashboard"
+                signUpForceRedirectUrl="/dashboard"
+              >
+                Sign In
+              </SignInButton>
             </Unauthenticated>
 
             <Authenticated>
