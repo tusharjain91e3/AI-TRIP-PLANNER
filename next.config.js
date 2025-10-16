@@ -7,7 +7,7 @@ const nextConfig = {
       headers: [
         {
           key: 'Content-Security-Policy',
-          value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.convex.cloud https://openweathermap.org; font-src 'self'; connect-src 'self' https://*.convex.cloud; frame-ancestors 'self'; form-action 'self'; base-uri 'self';",
+          value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://correct-duckling-27.clerk.accounts.dev https://va.vercel-scripts.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.convex.cloud https://openweathermap.org; font-src 'self' data:; connect-src 'self' https://*.convex.cloud https://*.clerk.accounts.dev ws://localhost:8888; frame-ancestors 'self'; form-action 'self'; base-uri 'self';",
         },
         {
           key: 'X-Frame-Options',

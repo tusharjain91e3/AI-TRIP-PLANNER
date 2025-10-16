@@ -24,7 +24,16 @@ import { z } from "zod";
 import { useToast } from "@/components/ui/use-toast";
 import { useUser } from "@clerk/nextjs";
 import { ShieldX } from "lucide-react";
-import { isRateLimitError } from "@convex-dev/rate-limiter";
+
+function isRateLimitError(error: unknown): error is { data: { retryAfter: number } } {
+  if (!error || typeof error !== "object") return false;
+  const anyErr = error as any;
+  return (
+    anyErr.data != null &&
+    typeof anyErr.data === "object" &&
+    typeof anyErr.data.retryAfter === "number"
+  );
+}
 
 const formSchema = z.object({
   email: z.string().min(2).max(50),

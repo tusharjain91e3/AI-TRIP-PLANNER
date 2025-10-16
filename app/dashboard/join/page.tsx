@@ -1,6 +1,7 @@
 "use client";
 
 import { useToast } from "@/components/ui/use-toast";
+import { Suspense } from "react";
 import { api } from "@/convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 import { useMutation } from "convex/react";
@@ -12,6 +13,14 @@ import { useEffect, type FC } from "react";
 import joinNow from "@/public/join-now.svg";
 
 const Join = () => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <JoinContent />
+    </Suspense>
+  );
+};
+
+const JoinContent = () => {
   const { isLoaded, isSignedIn, user } = useUser();
   const router = useRouter();
   const searchParams = useSearchParams();

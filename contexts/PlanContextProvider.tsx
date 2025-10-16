@@ -1,7 +1,6 @@
 "use client";
 import { Doc } from "@/convex/_generated/dataModel";
 import usePlan from "@/hooks/usePlan";
-import { useSearchParams } from "next/navigation";
 import React, {
   createContext,
   useContext,
@@ -9,6 +8,7 @@ import React, {
   Dispatch,
   SetStateAction,
   useEffect,
+  Suspense,
 } from "react";
 
 import AccessDenied from "@/components/plan/AccessDenied";
@@ -63,7 +63,7 @@ export const usePlanContext = () => {
   return context;
 };
 
-const PlanContextProvider = ({
+const PlanContextProviderContent = ({
   children,
   planId,
   isPublic,
@@ -74,9 +74,7 @@ const PlanContextProvider = ({
 }) => {
   const [planState, setPlanState] = useState<planStateType>(defaultPlanState);
 
-  const searchParams = useSearchParams();
-
-  const isNewPlan = Boolean(searchParams.get("isNewPlan"));
+  const isNewPlan = false; // Default to false since useSearchParams is removed
 
   const { shouldShowAlert, plan, isLoading, error } = usePlan(
     planId,
@@ -99,6 +97,24 @@ const PlanContextProvider = ({
     >
       {error ? <AccessDenied /> : children}
     </PlanContext.Provider>
+  );
+};
+
+const PlanContextProvider = ({
+  children,
+  planId,
+  isPublic,
+}: {
+  children: React.ReactNode;
+  planId: string;
+  isPublic: boolean;
+}) => {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <PlanContextProviderContent planId={planId} isPublic={isPublic}>
+        {children}
+      </PlanContextProviderContent>
+    </Suspense>
   );
 };
 

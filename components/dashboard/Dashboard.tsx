@@ -4,7 +4,8 @@ import PlanCard from "@/components/dashboard/PlanCard";
 import { GeneratePlanDrawerWithDialog } from "@/components/shared/DrawerWithDialogGeneric";
 import { Input } from "@/components/ui/input";
 import { api } from "@/convex/_generated/api";
-import { useQuery } from "convex-helpers/react/cache/hooks";
+import { useQuery } from "convex/react";
+import { useUser } from "@clerk/nextjs";
 import { Search } from "lucide-react";
 import { ChangeEvent, Component, ReactNode, useState } from "react";
 
@@ -34,8 +35,9 @@ class ErrorBoundary extends Component<
 }
 
 function DashboardInner() {
+  const { user, isLoaded } = useUser();
   const [searchPlanText, setSearchPlanText] = useState("");
-  const plans = useQuery(api.plan.getAllPlansForAUser, {});
+  const plans = useQuery(api.plan.getAllPlansForAUser, user ? {} : "skip");
 
   const [filteredPlans, setFilteredPlans] = useState<typeof plans>();
   const finalPlans = filteredPlans ?? plans;
@@ -89,8 +91,8 @@ function DashboardInner() {
           className="mt-5 mx-auto bg-background dark:border-2 dark:border-border/50 rounded-sm flex-1"
           style={{ flex: "1 1 auto" }}
         >
-          {!finalPlans || finalPlans.length === 0 ? (
-            <NoPlans isLoading={!plans} />
+          {!isLoaded || !finalPlans || finalPlans.length === 0 ? (
+            <NoPlans isLoading={!isLoaded || !plans} />
           ) : (
             <div
               className="grid grid-cols-1 

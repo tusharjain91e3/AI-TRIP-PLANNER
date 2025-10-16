@@ -63,10 +63,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <meta
-          httpEquiv="Content-Security-Policy"
-          content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://*.convex.cloud https://openweathermap.org; font-src 'self'; connect-src 'self' https://*.convex.cloud; frame-ancestors 'self'; form-action 'self'; base-uri 'self';"
-        />
       </head>
       <body className={`${inter.className} ${inter.variable}`}>
         <ThemeProvider

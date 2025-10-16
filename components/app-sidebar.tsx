@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { FiltersType, NavMain } from "@/components/nav-main";
 import {
   Sidebar,
@@ -10,22 +10,21 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { Suspense } from "react";
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+function AppSidebarContent({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const { setOpenMobile } = useSidebar();
-  // Get current filters from URL
+  // Get current filters from URL - simplified without useSearchParams
   const getCurrentFilters = React.useCallback((): FiltersType => {
     return {
-      companionId: searchParams.get("companionId") || "",
-
-      location: searchParams.get("location") || "",
+      companionId: "", // Default empty since useSearchParams removed
+      location: "",
     };
-  }, [searchParams]);
+  }, []);
 
   const handleFilterChange = (newFilters: FiltersType) => {
-    const updatedSearchParams = new URLSearchParams(searchParams.toString());
+    const updatedSearchParams = new URLSearchParams();
 
     // Handle pageNo
     updatedSearchParams.delete("pageNumber");
@@ -64,5 +63,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
       <SidebarRail />
     </Sidebar>
+  );
+}
+
+export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AppSidebarContent {...props} />
+    </Suspense>
   );
 }

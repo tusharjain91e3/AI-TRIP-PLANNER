@@ -1,6 +1,15 @@
+import { Suspense } from "react";
 import Link from "next/link";
 
 export default function NotFound() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <NotFoundContent />
+    </Suspense>
+  );
+}
+
+function NotFoundContent() {
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-1 py-10 md:py-16 lg:py-20 gap-10 flex flex-col items-center justify-center text-center">

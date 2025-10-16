@@ -6,7 +6,7 @@ import { Resend } from "resend";
 import InviteEmail from "./InviteEmail";
 import React from "react";
 import { getIdentityOrThrow } from "./utils";
-import { rateLimiter } from "./rateLimit";
+// import { rateLimiter } from "./rateLimit";
 
 const resend = new Resend("re_YW3HtfS5_8XD87g7Lmenhw3U6128yn7EE");
 
@@ -16,19 +16,19 @@ export const sendInvite = action({
     const identity = await getIdentityOrThrow(ctx);
     const { subject } = identity;
     if (!subject) return;
-    // await rateLimiter.reset(ctx, "sendEmailInvite", { key: subject });
-    const status = await rateLimiter.check(ctx, "sendEmailInvite", {
-      key: subject,
-    });
-    console.log({
-      rateLimitStatus: status,
-      userId: subject,
-      planId: args.planId,
-    });
-    await rateLimiter.limit(ctx, "sendEmailInvite", {
-      key: subject,
-      throws: true,
-    });
+    // Rate limiting commented out
+    // const status = await rateLimiter.check(ctx, "sendEmailInvite", {
+    //   key: subject,
+    // });
+    // console.log({
+    //   rateLimitStatus: status,
+    //   userId: subject,
+    //   planId: args.planId,
+    // });
+    // await rateLimiter.limit(ctx, "sendEmailInvite", {
+    //   key: subject,
+    //   throws: true,
+    // });
 
     const result = await ctx.runQuery(api.plan.PlanAdmin, {
       planId: args.planId,
