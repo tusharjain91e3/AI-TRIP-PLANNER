@@ -29,8 +29,8 @@ export const metadata: Metadata = {
 
 export default function DashboardPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    // <Suspense fallback={<div>Loading...</div>}>
       <Dashboard />
-    </Suspense>
+    // </Suspense>
   );
 }

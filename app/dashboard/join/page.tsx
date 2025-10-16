@@ -14,9 +14,9 @@ import joinNow from "@/public/join-now.svg";
 
 const Join = () => {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    // <Suspense fallback={<div>Loading...</div>}>
       <JoinContent />
-    </Suspense>
+    // </Suspense>
   );
 };
 

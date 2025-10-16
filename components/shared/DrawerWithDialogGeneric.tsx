@@ -19,18 +19,51 @@ import NewPlanForm from "@/components/NewPlanForm";
 import { Backpack, LockIcon } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { Loading } from "@/components/shared/Loading"; // Add your loading component
+
+// Loading state component
+const CreditsLoading = () => (
+  <div className="flex flex-col items-center justify-center p-8 gap-4">
+    <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin" />
+    <span className="text-sm text-muted-foreground">Loading credits...</span>
+  </div>
+);
+
+// Error state component
+const CreditsError = ({ onRetry }: { onRetry: () => void }) => (
+  <div className="flex flex-col items-center justify-center p-8 gap-4">
+    <div className="text-destructive">Failed to load credits</div>
+    <Button variant="outline" onClick={onRetry} size="sm">
+      Retry
+    </Button>
+  </div>
+);
 
 export const CreditsDrawerWithDialog = () => {
-  const user = useQuery(api.users.currentUser);
-  const boughtCredits = user?.credits ?? 0;
-  const freeCredits = user?.freeCredits ?? 0;
-  const totalCredits = freeCredits + boughtCredits;
+  const userQuery = useQuery(api.users.currentUser);
+  const [retryCount, setRetryCount] = useState(0);
 
-  const dialogTriggerBtn = (
+  const handleRetry = () => {
+    setRetryCount(prev => prev + 1);
+  };
+
+  const boughtCredits = userQuery?.credits ?? 0;
+  const freeCredits = userQuery?.freeCredits ?? 0;
+  const totalCredits = freeCredits + boughtCredits;
+  const email = userQuery?.email;
+
+  const isLoading = userQuery === undefined;
+
+  const dialogTriggerBtn = isLoading ? (
+    <Button variant="link" className="text-foreground" disabled>
+      <div className="w-4 h-4 border-2 border-primary/20 border-t-primary rounded-full animate-spin mr-2" />
+      Loading...
+    </Button>
+  ) : (
     <Button
-      aria-label={`open dialog button for Credits ${totalCredits ?? 0}`}
+      aria-label={`Credits: ${totalCredits}`}
       variant="link"
-      className="text-foreground"
+      className="text-foreground p-0 h-auto"
     >
       Credits {totalCredits}
     </Button>
@@ -38,64 +71,81 @@ export const CreditsDrawerWithDialog = () => {
 
   return (
     <DrawerWithDialog dialogTriggerBtn={dialogTriggerBtn}>
-      <CreditContent
-        boughtCredits={boughtCredits}
-        freeCredits={freeCredits}
-        email={user?.email}
-      />
-    </DrawerWithDialog>
-  );
-};
-
-export const GeneratePlanDrawerWithDialog = () => {
-  const user = useQuery(api.users.currentUser);
-  const boughtCredits = user?.credits ?? 0;
-  const freeCredits = user?.freeCredits ?? 0;
-  const totalCredits = freeCredits + boughtCredits;
-  const dialogTriggerBtn = (
-    <Button
-      aria-label={`open dialog button for Create Travel Plan`}
-      className="bg-blue-500  hover:bg-blue-600 text-white flex gap-1 justify-center items-center"
-    >
-      <Backpack className="h-4 w-4" />
-      <span>Create Travel Plan</span>
-    </Button>
-  );
-  return (
-    <DrawerWithDialog dialogTriggerBtn={dialogTriggerBtn}>
-      {({ setOpen }) => (
-        <>
-          {totalCredits > 0 ? (
-            <>
-              <DialogHeader>
-                <DialogTitle>Create Travel Plan</DialogTitle>
-              </DialogHeader>
-              <NewPlanForm closeModal={setOpen} />
-            </>
-          ) : (
-            <CreditContent
-              boughtCredits={boughtCredits}
-              freeCredits={freeCredits}
-              email={user?.email}
-            />
-          )}
-        </>
+      {isLoading ? (
+        <CreditsLoading />
+      ) : (
+        <CreditContent
+          boughtCredits={boughtCredits}
+          freeCredits={freeCredits}
+          email={email}
+        />
       )}
     </DrawerWithDialog>
   );
 };
 
-const DrawerWithDialog = ({
-  dialogTriggerBtn,
-  children,
-}: {
+export const GeneratePlanDrawerWithDialog = () => {
+  const userQuery = useQuery(api.users.currentUser);
+  const [retryCount, setRetryCount] = useState(0);
+
+  const handleRetry = () => {
+    setRetryCount(prev => prev + 1);
+  };
+
+  const boughtCredits = userQuery?.credits ?? 0;
+  const freeCredits = userQuery?.freeCredits ?? 0;
+  const totalCredits = freeCredits + boughtCredits;
+  const email = userQuery?.email;
+
+  const isLoading = userQuery === undefined;
+
+  const dialogTriggerBtn = isLoading ? (
+    <Button disabled className="bg-blue-500/50">
+      <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin mr-2" />
+      Loading...
+    </Button>
+  ) : (
+    <Button
+      aria-label="Create Travel Plan"
+      className="bg-blue-500 hover:bg-blue-600 text-white flex gap-1 justify-center items-center transition-colors"
+    >
+      <Backpack className="h-4 w-4" />
+      <span>Create Travel Plan</span>
+    </Button>
+  );
+
+  return (
+    <DrawerWithDialog dialogTriggerBtn={dialogTriggerBtn}>
+      {({ setOpen }) =>
+        isLoading ? (
+          <CreditsLoading />
+        ) : totalCredits > 0 ? (
+          <>
+            <DialogHeader>
+              <DialogTitle>Create Travel Plan</DialogTitle>
+            </DialogHeader>
+            <NewPlanForm closeModal={setOpen} />
+          </>
+        ) : (
+          <CreditContent
+            boughtCredits={boughtCredits}
+            freeCredits={freeCredits}
+            email={email}
+          />
+        )
+      }
+    </DrawerWithDialog>
+  );
+};
+
+interface DrawerWithDialogProps {
   dialogTriggerBtn: ReactNode;
   children:
-    | React.ReactNode
-    | ((props: {
-        setOpen: Dispatch<SetStateAction<boolean>>;
-      }) => React.ReactNode);
-}) => {
+    | ReactNode
+    | ((props: { setOpen: Dispatch<SetStateAction<boolean>> }) => ReactNode);
+}
+
+const DrawerWithDialog = ({ dialogTriggerBtn, children }: DrawerWithDialogProps) => {
   const [open, setOpen] = useState(false);
   const isDesktop = useMediaQuery("(min-width: 768px)");
 
@@ -108,91 +158,108 @@ const DrawerWithDialog = ({
 
   if (isDesktop) {
     return (
-      <>
-        <Dialog open={open} onOpenChange={setOpen}>
-          <DialogTrigger asChild>{dialogTriggerBtn}</DialogTrigger>
-          <DialogContent className="max-w-xl">{renderContent()}</DialogContent>
-        </Dialog>
-      </>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>{dialogTriggerBtn}</DialogTrigger>
+        <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto">
+          {renderContent()}
+        </DialogContent>
+      </Dialog>
     );
   }
 
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerTrigger asChild>{dialogTriggerBtn}</DrawerTrigger>
-      <DrawerContent className="flex flex-col gap-10 p-5">
+      <DrawerContent className="flex flex-col gap-6 p-4 max-h-[90vh] overflow-y-auto">
         {renderContent()}
       </DrawerContent>
     </Drawer>
   );
 };
 
-const CreditContent = ({
-  boughtCredits,
-  freeCredits,
-  email,
-}: {
+interface CreditContentProps {
   boughtCredits: number;
   freeCredits: number;
-  email: string | undefined;
-}) => {
+  email?: string;
+}
+
+const CreditContent = ({ boughtCredits, freeCredits, email }: CreditContentProps) => {
+  const totalCredits = freeCredits + boughtCredits;
+  const hasCredits = boughtCredits > 0 || freeCredits > 0;
+
   return (
-    <div>
-      {boughtCredits > 0 || freeCredits > 0 ? (
-        <div className="flex gap-2 justify-between items-center p-2">
-          <div className="flex flex-col gap-1 justify-center items-center p-10 rounded-lg border-2 flex-1">
-            <span>Free Credits</span>
-            <span className="font-bold text-7xl">{freeCredits}</span>
+    <div className="flex flex-col gap-6 p-2">
+      {hasCredits ? (
+        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col gap-2 justify-center items-center p-6 rounded-lg border flex-1 bg-card">
+            <span className="text-muted-foreground text-sm">Free Credits</span>
+            <span className="font-bold text-4xl text-primary">{freeCredits}</span>
           </div>
-          <div className="flex flex-col gap-1 justify-center items-center p-10 rounded-lg border-2 flex-1">
-            <span>Bought Credits</span>
-            <span className="font-bold text-7xl">{boughtCredits}</span>
+          <div className="flex flex-col gap-2 justify-center items-center p-6 rounded-lg border flex-1 bg-card">
+            <span className="text-muted-foreground text-sm">Bought Credits</span>
+            <span className="font-bold text-4xl text-primary">{boughtCredits}</span>
           </div>
         </div>
       ) : (
-        <div className="flex flex-col gap-10 justify-center items-center">
-          <h1 className="font-bold text-xl">You are out of credits!</h1>
-          <Image
-            alt="Empty Cart"
-            src={empty_cart}
-            width={300}
-            height={300}
-            className="bg-contain"
-          />
+        <div className="flex flex-col gap-6 justify-center items-center text-center">
+          <h1 className="font-bold text-xl text-foreground">
+            You are out of credits!
+          </h1>
+          <div className="relative">
+            <Image
+              alt="Empty Cart"
+              src={empty_cart}
+              width={200}
+              height={200}
+              className="opacity-60"
+              priority={false}
+            />
+          </div>
+          <p className="text-muted-foreground text-sm">
+            Purchase credits to create amazing travel plans
+          </p>
         </div>
       )}
 
-      <Link
-        className={cn(
-          buttonVariants({ variant: "default" }),
-          "bg-blue-500 text-white hover:bg-blue-700",
-          "flex gap-1 justify-center items-center mt-2 mb-1"
-        )}
-        href={`${process.env.NEXT_PUBLIC_RAZORPAY_PAYMENT_PAGE_URL}${
-          email ? `/?email=${email} ` : ``
-        }`}
-      >
-        <LockIcon className="w-4 h-4" />
-        <span>Purchase Credits</span>
-      </Link>
-      <div className="flex gap-1 justify-end">
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 18 20"
-          fill="#3b82f6"
-          xmlns="http://www.w3.org/2000/svg"
+      <div className="flex flex-col gap-3 pt-2">
+        <Link
+          className={cn(
+            buttonVariants({ variant: "default" }),
+            "bg-blue-500 hover:bg-blue-600 text-white flex gap-2 justify-center items-center w-full",
+            "transition-all duration-200 shadow-lg hover:shadow-xl"
+          )}
+          href={
+            email
+              ? `${process.env.NEXT_PUBLIC_RAZORPAY_PAYMENT_PAGE_URL}/?email=${encodeURIComponent(email)}`
+              : process.env.NEXT_PUBLIC_RAZORPAY_PAYMENT_PAGE_URL || "/purchase"
+          }
+          target="_blank"
+          rel="noopener noreferrer"
         >
-          <path
-            d="M7.077 6.476l-.988 3.569 5.65-3.589-3.695 13.54 3.752.004 5.457-20L7.077 6.476z"
-            fill="#3b82f6"
-          ></path>
-          <path
-            d="M1.455 14.308L0 20h7.202L10.149 8.42l-8.694 5.887z"
-            fill="#072654"
-          ></path>
-        </svg>
-        <span className="text-[10px]">Secured by Razorpay</span>
+          <LockIcon className="w-4 h-4" />
+          <span>Purchase Credits</span>
+        </Link>
+        
+        <div className="flex gap-1 justify-center items-center pt-2">
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 18 20"
+            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
+            className="text-blue-500"
+          >
+            <path
+              d="M7.077 6.476l-.988 3.569 5.65-3.589-3.695 13.54 3.752.004 5.457-20L7.077 6.476z"
+              fill="#3b82f6"
+            />
+            <path
+              d="M1.455 14.308L0 20h7.202L10.149 8.42l-8.694 5.887z"
+              fill="#072654"
+            />
+          </svg>
+          <span className="text-xs text-muted-foreground">Secured by Razorpay</span>
+        </div>
       </div>
     </div>
   );

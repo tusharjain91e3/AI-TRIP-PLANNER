@@ -127,12 +127,13 @@ export async function userQuery(ctx: QueryCtx, clerkUserId: string) {
 }
 
 /** The current user, containing user preferences and Clerk user info. */
-export const currentUser = query((ctx: QueryCtx) => getCurrentUser(ctx));
-
-async function getCurrentUser(ctx: QueryCtx): Promise<Doc<"users"> | null> {
-  const identity = await ctx.auth.getUserIdentity();
-  if (identity === null) {
-    return null;
-  }
-  return await userQuery(ctx, identity.subject);
-}
+export const currentUser = query({
+  args: {},
+  async handler(ctx) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (identity === null) {
+      return null;
+    }
+    return await userQuery(ctx, identity.subject);
+  },
+});

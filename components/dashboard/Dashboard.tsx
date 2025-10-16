@@ -37,11 +37,15 @@ class ErrorBoundary extends Component<
 function DashboardInner() {
   const { user, isLoaded } = useUser();
   const [searchPlanText, setSearchPlanText] = useState("");
-  const plans = useQuery(api.plan.getAllPlansForAUser, user ? {} : "skip");
+  const plans = useQuery(
+    api.plan.getAllPlansForAUser,
+    !isLoaded ? "skip" : undefined
+  );
+
+  console.log({ isLoaded, user, plans });
 
   const [filteredPlans, setFilteredPlans] = useState<typeof plans>();
   const finalPlans = filteredPlans ?? plans;
-
   const handleSearch = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSearchPlanText(value);
@@ -91,11 +95,13 @@ function DashboardInner() {
           className="mt-5 mx-auto bg-background dark:border-2 dark:border-border/50 rounded-sm flex-1"
           style={{ flex: "1 1 auto" }}
         >
-          {!isLoaded || !finalPlans || finalPlans.length === 0 ? (
-            <NoPlans isLoading={!isLoaded || !plans} />
+          {!isLoaded ? (
+            <NoPlans isLoading={true} />
+          ) : !finalPlans || finalPlans.length === 0 ? (
+            <NoPlans isLoading={false} />
           ) : (
             <div
-              className="grid grid-cols-1 
+              className="grid grid-cols-1
                       md:grid-cols-2 lg:grid-cols-3
                       2xl:grid-cols-4 4xl:grid-cols-6
                       gap-5 p-10 justify-center"
