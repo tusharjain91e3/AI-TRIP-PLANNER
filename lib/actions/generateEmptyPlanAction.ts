@@ -13,7 +13,7 @@ export async function generateEmptyPlanAction(formData: formSchemaType) {
     const planId = await fetchMutation(api.plan.createEmptyPlan,
         {
             placeName,
-            noOfDays: differenceInDays(datesOfTravel.from, datesOfTravel.to).toString(),
+            noOfDays: (differenceInDays(datesOfTravel.to, datesOfTravel.from) + 1).toString(),
             activityPreferences,
             fromDate: datesOfTravel.from.getTime(),
             toDate: datesOfTravel.to.getTime(),

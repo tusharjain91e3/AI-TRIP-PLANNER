@@ -65,19 +65,21 @@ export default function RootLayout({
       <head>
       </head>
       <body className={`${inter.className} ${inter.variable}`}>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="light"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <ErrorBoundary>
-            <ConvexClientProvider>{children}</ConvexClientProvider>
-            <Progress />
-            <Analytics />
-            <Toaster />
-          </ErrorBoundary>
-        </ThemeProvider>
+        <ConvexClientProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="light"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <ErrorBoundary>
+              {children}
+              <Progress />
+              <Analytics />
+              <Toaster />
+            </ErrorBoundary>
+          </ThemeProvider>
+        </ConvexClientProvider>
       </body>
     </html>
   );

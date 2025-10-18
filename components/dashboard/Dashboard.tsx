@@ -7,7 +7,7 @@ import { api } from "@/convex/_generated/api";
 import { useQuery } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import { Search } from "lucide-react";
-import { ChangeEvent, Component, ReactNode, useState } from "react";
+import { ChangeEvent, Component, ReactNode, useEffect, useState } from "react";
 
 class ErrorBoundary extends Component<
   { children: ReactNode },
@@ -35,11 +35,17 @@ class ErrorBoundary extends Component<
 }
 
 function DashboardInner() {
-  const { user, isLoaded } = useUser();
+  const { user, isLoaded, isSignedIn } = useUser();
   const [searchPlanText, setSearchPlanText] = useState("");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const plans = useQuery(
     api.plan.getAllPlansForAUser,
-    !isLoaded ? "skip" : undefined
+    !isLoaded || !isSignedIn ? "skip" : undefined
   );
 
   console.log({ isLoaded, user, plans });
@@ -95,7 +101,7 @@ function DashboardInner() {
           className="mt-5 mx-auto bg-background dark:border-2 dark:border-border/50 rounded-sm flex-1"
           style={{ flex: "1 1 auto" }}
         >
-          {!isLoaded ? (
+          {!mounted || !isLoaded ? (
             <NoPlans isLoading={true} />
           ) : !finalPlans || finalPlans.length === 0 ? (
             <NoPlans isLoading={false} />

@@ -1,5 +1,5 @@
 {
   "name": "travel-planner-ai",
-  "schema": "components/convex/schema.ts",
-  "functions": "components/convex/functions"
+  "schema": "convex/schema.ts",
+  "functions": "convex"
 }
