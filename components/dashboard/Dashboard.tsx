@@ -4,7 +4,7 @@ import PlanCard from "@/components/dashboard/PlanCard";
 import { GeneratePlanDrawerWithDialog } from "@/components/shared/DrawerWithDialogGeneric";
 import { Input } from "@/components/ui/input";
 import { api } from "@/convex/_generated/api";
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { useUser } from "@clerk/nextjs";
 import { Search } from "lucide-react";
 import { ChangeEvent, Component, ReactNode, useEffect, useState } from "react";
@@ -43,12 +43,40 @@ function DashboardInner() {
     setMounted(true);
   }, []);
 
+  // First, ensure user exists in Convex
+  const convexUser = useQuery(
+    api.users.currentUser,
+    isLoaded && isSignedIn ? {} : "skip"
+  );
+  
+  // Auto-create user if they don't exist
+  const ensureUserMutation = useMutation(api.users.ensureUser);
+  
+  useEffect(() => {
+    if (isLoaded && isSignedIn && convexUser === null) {
+      console.log("User not found in Convex, creating...");
+      ensureUserMutation({}).catch(console.error);
+    }
+  }, [isLoaded, isSignedIn, convexUser, ensureUserMutation]);
+
+  // Then fetch plans
   const plans = useQuery(
     api.plan.getAllPlansForAUser,
-    !isLoaded || !isSignedIn ? "skip" : undefined
+    isLoaded && isSignedIn && convexUser ? undefined : "skip"
   );
 
-  console.log({ isLoaded, user, plans });
+  // Enhanced logging for debugging
+  useEffect(() => {
+    console.log("🔍 Dashboard State:", { 
+      isLoaded, 
+      isSignedIn,
+      userEmail: user?.emailAddresses?.[0]?.emailAddress,
+      convexUser: convexUser ? 'exists' : 'null',
+      convexUserCredits: convexUser?.freeCredits,
+      plansCount: Array.isArray(plans) ? plans.length : 'not-array',
+      plansValue: plans 
+    });
+  }, [isLoaded, isSignedIn, user, convexUser, plans]);
 
   const [filteredPlans, setFilteredPlans] = useState<typeof plans>();
   const finalPlans = filteredPlans ?? plans;

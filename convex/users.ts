@@ -137,3 +137,37 @@ export const currentUser = query({
     return await userQuery(ctx, identity.subject);
   },
 });
+
+/** Ensure user exists - creates user if not found */
+export const ensureUser = mutation({
+  args: {},
+  async handler(ctx) {
+    const identity = await ctx.auth.getUserIdentity();
+    if (identity === null) {
+      throw new ConvexError("Not authenticated");
+    }
+    
+    // Check if user exists
+    let user = await ctx.db
+      .query("users")
+      .withIndex("by_clerk_id", (q) => q.eq("userId", identity.subject))
+      .unique();
+    
+    // If user doesn't exist, create them
+    if (!user) {
+      console.log("Creating new user:", identity.subject, identity.email);
+      const userId = await ctx.db.insert("users", {
+        userId: identity.subject,
+        email: identity.email || "",
+        firstName: identity.givenName || "",
+        lastName: identity.familyName || "",
+        credits: 0,
+        freeCredits: 5,
+      });
+      
+      user = await ctx.db.get(userId);
+    }
+    
+    return user;
+  },
+});

@@ -4,6 +4,12 @@ import {
   batch3Schema
 } from "./schemas";
 
+import {
+  buildBatch1Fallback,
+  buildBatch2Fallback,
+  buildBatch3Fallback,
+} from "./fallbacks";
+
 import OpenAI from "openai";
 
 // Lazy initialization pattern for OpenAI client
@@ -50,7 +56,71 @@ Generate response as per the function schema provided.
 Dates given, activity preference and travelling companion may influence like 50% while generating plan.`;
 
 // Robust API call function with error handling
-const callOpenAIApi = async (prompt: string, schema: any, description: string) => {
+type FunctionCallLikeResponse = {
+  choices: Array<{
+    message: {
+      function_call?: {
+        arguments?: string;
+      };
+    };
+  }>;
+};
+
+const buildFunctionCallResponse = (payload: unknown): FunctionCallLikeResponse => ({
+  choices: [
+    {
+      message: {
+        function_call: {
+          arguments: JSON.stringify(payload ?? {}),
+        },
+      },
+    },
+  ],
+});
+
+const shouldFallback = (error: unknown) => {
+  if (!error) {
+    return false;
+  }
+
+  const maybeError = error as { message?: string; status?: number; code?: string };
+
+  if (typeof maybeError.status === "number") {
+    if ([401, 402, 408, 409, 429, 500, 502, 503, 504].includes(maybeError.status)) {
+      return true;
+    }
+  }
+
+  if (typeof maybeError.code === "string") {
+    const lowered = maybeError.code.toLowerCase();
+    if (lowered.includes("quota") || lowered.includes("timeout")) {
+      return true;
+    }
+  }
+
+  if (maybeError.message) {
+    const lowered = maybeError.message.toLowerCase();
+    if (
+      lowered.includes("quota") ||
+      lowered.includes("api key") ||
+      lowered.includes("insufficient") ||
+      lowered.includes("timeout") ||
+      lowered.includes("network") ||
+      lowered.includes("connect")
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+};
+
+const callOpenAIApi = async (
+  prompt: string,
+  schema: Record<string, unknown>,
+  description: string,
+  fallbackFactory?: () => Record<string, unknown>
+) => {
   try {
     const client = getOpenAIClient();
     
@@ -82,6 +152,11 @@ const callOpenAIApi = async (prompt: string, schema: any, description: string) =
     return response;
   } catch (error) {
     console.error("OpenAI API call failed:", error);
+
+    if (fallbackFactory && shouldFallback(error)) {
+      console.warn("Using deterministic fallback content for travel plan generation.");
+      return buildFunctionCallResponse(fallbackFactory());
+    }
     
     // Re-throw with more context
     if (error instanceof Error) {
@@ -93,7 +168,7 @@ const callOpenAIApi = async (prompt: string, schema: any, description: string) =
 }
 
 // Type definitions
-type OpenAIInputType = {
+export type OpenAIInputType = {
   userPrompt: string;
   activityPreferences?: string[];
   fromDate?: number;
@@ -111,7 +186,12 @@ export const generatebatch1 = async (promptText: string) => {
 
 Ensure the response adheres exactly to the schema and is in valid JSON format.`;
 
-  return await callOpenAIApi(prompt, batch1Schema, description);
+  return await callOpenAIApi(
+    prompt,
+    batch1Schema,
+    description,
+    () => buildBatch1Fallback(promptText)
+  );
 }
 
 // Batch 2 generator
@@ -124,7 +204,12 @@ export const generatebatch2 = async (inputParams: OpenAIInputType) => {
 
 Ensure the response adheres exactly to the schema and is in valid JSON format.`;
 
-  return await callOpenAIApi(getPrompt(inputParams), batch2Schema, description);
+  return await callOpenAIApi(
+    getPrompt(inputParams),
+    batch2Schema,
+    description,
+    () => buildBatch2Fallback(inputParams.userPrompt ?? "", inputParams.activityPreferences)
+  );
 }
 
 // Batch 3 generator  
@@ -136,7 +221,17 @@ export const generatebatch3 = async (inputParams: OpenAIInputType) => {
 
 Ensure the response adheres exactly to the schema and is in valid JSON format.`;
 
-  return await callOpenAIApi(getPrompt(inputParams), batch3Schema, description);
+  return await callOpenAIApi(
+    getPrompt(inputParams),
+    batch3Schema,
+    description,
+    () =>
+      buildBatch3Fallback(
+        inputParams.userPrompt ?? "",
+        inputParams.activityPreferences,
+        inputParams.companion
+      )
+  );
 }
 
 // Improved prompt builder

@@ -8,22 +8,23 @@ import {Id} from "@/convex/_generated/dataModel";
 import {Analytics} from "@vercel/analytics/react";
 import {fetchQuery} from "convex/nextjs";
 import {Metadata, ResolvingMetadata} from "next";
+import {ReactNode} from "react";
 
 export async function generateMetadata(
   {
     params,
   }: {
-    params: {planId: string};
+    params: Promise<{planId: string}>;
   },
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const id = params.planId;
+  const {planId} = await params;
   const token = await getAuthToken();
 
   try {
     const plan = await fetchQuery(
       api.plan.getSinglePlan,
-      {id: id as Id<"plan">, isPublic: false},
+      {id: planId as Id<"plan">, isPublic: false},
       {token}
     );
     return {
@@ -36,18 +37,19 @@ export async function generateMetadata(
   }
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
   params,
 }: {
-  children: React.ReactNode;
-  params: {planId: string};
+  children: ReactNode;
+  params: Promise<{planId: string}>;
 }) {
+  const {planId} = await params;
   return (
     <>
       <Header isPublic={false} />
       <main className="flex min-h-[calc(100svh-4rem)] flex-col items-center bg-blue-50/40 dark:bg-background">
-        <PlanLayoutContent planId={params.planId} isPublic={false}>
+        <PlanLayoutContent planId={planId} isPublic={false}>
           {children}
         </PlanLayoutContent>
         <Progress />

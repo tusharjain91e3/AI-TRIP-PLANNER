@@ -1,15 +1,26 @@
 import Plan from "@/components/plan/Plan";
+import { PlanDebugger } from "@/components/debug/PlanDebugger";
 
 export default async function PlanPage({
   params,
   searchParams,
 }: {
-  params: { planId: string };
-  searchParams?: { isNewPlan: string };
+  params: Promise<{ planId: string }>;
+  searchParams?: Promise<{ isNewPlan?: string }>;
 }) {
-  const isNewPlan =
-    searchParams && searchParams.isNewPlan
-      ? Boolean(searchParams.isNewPlan)
-      : false;
-  return <Plan planId={params.planId} isNewPlan={isNewPlan} isPublic={false} />;
+  const { planId } = await params;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+
+  const isNewPlan = resolvedSearchParams?.isNewPlan
+    ? resolvedSearchParams.isNewPlan === "true" || resolvedSearchParams.isNewPlan === "1"
+    : false;
+  
+  return (
+    <div className="space-y-4">
+      {/* Debug panel - remove this after testing */}
+      <PlanDebugger planId={planId} />
+      
+      <Plan planId={planId} isNewPlan={isNewPlan} isPublic={false} />
+    </div>
+  );
 }

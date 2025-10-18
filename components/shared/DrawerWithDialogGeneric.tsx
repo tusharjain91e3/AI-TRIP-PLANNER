@@ -164,6 +164,7 @@ const DrawerWithDialog = ({ dialogTriggerBtn, children }: DrawerWithDialogProps)
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogTrigger asChild>{dialogTriggerBtn}</DialogTrigger>
         <DialogContent className="max-w-xl max-h-[90vh] overflow-y-auto p-0">
+          <DialogTitle className="sr-only">Create Travel Plan</DialogTitle>
           {renderContent()}
         </DialogContent>
       </Dialog>

@@ -26,7 +26,7 @@ import { cn, getFormattedDateRange } from "@/lib/utils";
 import { useMutation } from "convex/react";
 import { ConvexError } from "convex/values";
 import { Calendar, Eye, Send, Settings2, Users2 } from "lucide-react";
-import { ReactNode, useEffect, useMemo, useState } from "react";
+import { ReactNode, forwardRef, useEffect, useMemo, useState } from "react";
 import { DateRange } from "react-day-picker";
 
 type PlanMetaDataProps = {
@@ -297,7 +297,7 @@ const Companion = ({
   );
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger>
+      <PopoverTrigger asChild>
         <IconWithToolTip tooltipText={tooltip}>
           <Button
             disabled={isLoading}
@@ -369,7 +369,7 @@ const Preferences = ({
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger>
+      <PopoverTrigger asChild>
         <IconWithToolTip tooltipText="Click to see the preferences">
           <Button
             disabled={isLoading}
@@ -404,14 +404,15 @@ const Preferences = ({
   );
 };
 
-const IconWithToolTip = ({
-  children,
-  tooltipText,
-}: {
+const IconWithToolTip = forwardRef<HTMLButtonElement, {
   children: ReactNode;
   tooltipText: string;
-}) => {
-  return <TooltipContainer text={tooltipText}>{children}</TooltipContainer>;
-};
+}>(function IconWithToolTip({ children, tooltipText, ...triggerProps }, ref) {
+  return (
+    <TooltipContainer text={tooltipText} {...triggerProps} ref={ref}>
+      {children}
+    </TooltipContainer>
+  );
+});
 
 export default PlanMetaData;

@@ -1,11 +1,25 @@
 // convex/auth.config.ts
 import { AuthConfig } from "convex/server";
 
+const clerkDomain = "https://correct-duckling-27.clerk.accounts.dev";
+const applicationIds = [
+  "convex",
+  "authenticated",
+  "default",
+  "pk_test_Y29ycmVjdC1kdWNrbGluZy0yNy5jbGVyay5hY2NvdW50cy5kZXYk",
+  clerkDomain,
+  `${clerkDomain}/`,
+] as const;
+
 export default {
-  providers: [
+  providers: applicationIds.flatMap((appId) => [
     {
-      domain: process.env.CLERK_JWT_ISSUER_DOMAIN!, // Your Clerk Issuer URL
-      applicationID: "convex", // This must be the exact string "convex"
+      domain: clerkDomain,
+      applicationID: appId,
     },
-  ],
+    {
+      domain: `${clerkDomain}/`,
+      applicationID: appId,
+    },
+  ]),
 } satisfies AuthConfig;
