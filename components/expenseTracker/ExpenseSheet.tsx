@@ -165,6 +165,7 @@ export default function ExpenseSheet({
                     <Input
                       placeholder="What what pupose did you spend?"
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
                   <FormMessage />
@@ -229,6 +230,7 @@ export default function ExpenseSheet({
                       type="number"
                       placeholder={`e.g. ${currency} 1000`}
                       {...field}
+                      value={field.value ?? ""}
                     />
                   </FormControl>
                   <FormMessage />

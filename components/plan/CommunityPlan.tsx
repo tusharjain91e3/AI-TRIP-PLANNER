@@ -17,7 +17,7 @@ type PlanProps = {
   planId: string;
 };
 
-export default async function CommunityPlan({ planId }: PlanProps) {
+export default function CommunityPlan({ planId }: PlanProps) {
   const { isLoading, plan } = usePlanContext();
 
   return (

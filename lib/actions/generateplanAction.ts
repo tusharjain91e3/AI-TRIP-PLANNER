@@ -2,7 +2,7 @@
 import { formSchemaType } from "@/components/NewPlanForm";
 import { fetchAction, fetchMutation, fetchQuery } from "convex/nextjs";
 import { api } from "@/convex/_generated/api";
-import type { Id } from "@/convex/_generated/dataModel";
+import type { Doc, Id } from "@/convex/_generated/dataModel";
 import { getAuthToken } from "@/app/auth";
 import { redirect } from "next/navigation";
 import { differenceInDays } from "date-fns";
@@ -11,7 +11,31 @@ export async function generatePlanAction(formData: formSchemaType) {
   const token = await getAuthToken();
   const { placeName, activityPreferences, datesOfTravel, companion } = formData;
 
-  const userData = await fetchQuery(api.users.currentUser, {}, { token });
+  const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+  let userData: Doc<"users"> | null = null;
+
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      userData = await fetchQuery(api.users.currentUser, {}, { token });
+      break;
+    } catch (error) {
+      console.error(
+        `[generatePlanAction] Unable to load user profile (attempt ${attempt}/3).`,
+        error
+      );
+      if (attempt < 3) {
+        await delay(300 * attempt);
+      }
+    }
+  }
+
+  if (!userData) {
+    console.error(
+      "[generatePlanAction] Aborting plan creation because user profile could not be retrieved after retries."
+    );
+    return null;
+  }
   const totalCredits = (userData?.credits ?? 0) + (userData?.freeCredits ?? 0);
   if (totalCredits <= 0) {
     console.log(
@@ -82,9 +106,6 @@ export async function generatePlanAction(formData: formSchemaType) {
       },
     },
   ];
-
-  const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
   const runInline = async (task: BackgroundTask) => {
     try {
       switch (task.action) {
@@ -142,7 +163,7 @@ export async function generatePlanAction(formData: formSchemaType) {
           error
         );
         if (attempt < maxAttempts) {
-          await wait(250 * attempt);
+          await delay(250 * attempt);
         }
       }
     }

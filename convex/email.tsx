@@ -8,7 +8,15 @@ import React from "react";
 import { getIdentityOrThrow } from "./utils";
 // import { rateLimiter } from "./rateLimit";
 
-const resend = new Resend("re_YW3HtfS5_8XD87g7Lmenhw3U6128yn7EE");
+const resendApiKey = process.env.RESEND_API_KEY;
+
+if (!resendApiKey) {
+  throw new ConvexError(
+    "Missing RESEND_API_KEY environment variable. Please set it in your Convex dashboard."
+  );
+}
+
+const resend = new Resend(resendApiKey);
 
 export const sendInvite = action({
   args: { planId: v.id("plan"), email: v.string() },
@@ -45,11 +53,11 @@ export const sendInvite = action({
       planId: args.planId,
       email: args.email,
     });
-
+//todo
     const BASE_URL = process.env.HOSTING_URL ?? "https://travelplannerai.site";
 
     const { data, error } = await resend.emails.send({
-      from: "Travel Planner AI <support@travelplannerai.site>",
+      from: "Travel Planner AI <onboarding@resend.dev>",
       to: args.email,
       subject: `You've been invited to join a travel plan`,
       react: (
